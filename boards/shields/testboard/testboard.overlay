@@ -3,7 +3,7 @@
 // instructions.
 
 #include <dt-bindings/zmk/matrix_transform.h>
-
+#include <physical_layouts.dtsi>
 #include "testboard-layouts.dtsi"
 
 / {
