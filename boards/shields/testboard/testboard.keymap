@@ -13,7 +13,14 @@
         default_layer {
             bindings = <
                 &kp A &kp B &kp E
-                &kp C &kp D &kp F
+                &mo 1 &kp D &kp F
+            >;
+        };
+
+        two_layer {
+            bindings = <
+                &kp N1 &kp N2 &kp N3
+                &kp N4 &kp N5 &kp N6
             >;
         };
     };
