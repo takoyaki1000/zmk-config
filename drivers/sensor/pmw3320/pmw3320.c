@@ -117,7 +117,9 @@ static int pmw3320_init(const struct device *dev) {
 #define PMW3320_INIT(n) \
     static struct pmw3320_data pmw3320_data_##n; \
     static const struct pmw3320_config pmw3320_config_##n = { \
-        .bus = SPI_DT_SPEC_INST_GET(n, SPI_WORD_SET(8) | SPI_TRANSFER_MSB, 0), \
+        .bus = SPI_DT_SPEC_GET(DT_DRV_INST(n), \
+                               SPI_WORD_SET(8) | SPI_TRANSFER_MSB, \
+                               0), \
         .irq_gpio = GPIO_DT_SPEC_INST_GET_OR(n, irq_gpios, {0}), \
     }; \
     DEVICE_DT_INST_DEFINE(n, pmw3320_init, NULL, \
