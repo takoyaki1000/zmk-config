@@ -80,8 +80,8 @@ static int pmw3320_init(const struct device *dev) {
     struct pmw3320_data *data = dev->data;
 
     uint8_t pid;
-    pmw3320_read(dev, PMW3320_REG_PRODUCT_ID, &pid);
-    LOG_INF("PMW3320 Product ID: 0x%02x", pid);
+    int ret = pmw3320_read(dev, PMW3320_REG_PRODUCT_ID, &pid);
+    LOG_ERR("PMW3320 communication test - RET: %d, PID: 0x%02x", ret, pid);
 
     if (!device_is_ready(config->bus.bus)) return -ENODEV;
 
