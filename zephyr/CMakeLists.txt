@@ -1,1 +1,1 @@
-add_subdirectory(.. drivers)
+add_subdirectory(../drivers drivers)
