@@ -50,6 +50,10 @@ static int pmw3320_write(const struct device *dev, uint8_t reg, uint8_t val) {
 }
 
 static void pmw3320_work_handler(struct k_work *work) {
+    static int count = 0;
+    if (count++ % 100 == 0) {
+        LOG_ERR("Work handler is running...");
+    }
     struct pmw3320_data *data = CONTAINER_OF(work, struct pmw3320_data, work);
     const struct device *dev = data->dev;
     uint8_t motion, xl, xh, yl, yh;
