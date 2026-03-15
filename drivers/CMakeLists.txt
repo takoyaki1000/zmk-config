@@ -1,1 +1,1 @@
-add_subdirectory_heading(sensor/pmw3320)
+add_subdirectory(sensor/pmw3320)

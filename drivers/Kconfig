@@ -1,2 +1,2 @@
-# sensor配下のKconfigを読み込む
-osource "sensor/pmw3320/Kconfig"
+# drivers/Kconfig
+rsource "sensor/pmw3320/Kconfig"
