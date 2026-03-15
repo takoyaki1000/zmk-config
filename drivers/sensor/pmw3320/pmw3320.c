@@ -58,29 +58,38 @@ static int pmw3320_write(const struct device *dev, uint8_t reg, uint8_t val) {
 }
 
 static void pmw3320_work_handler(struct k_work *work) {
-    static int count = 0;
+        static int count = 0;
     if (count++ % 100 == 0) {
         LOG_ERR("Work handler is running...");
     }
+    
     struct pmw3320_data *data = CONTAINER_OF(work, struct pmw3320_data, work);
     const struct device *dev = data->dev;
-    uint8_t motion, xl, xh, yl, yh;
+    uint8_t motion, dx_low, dy_low, dxy_hi;
 
     if (pmw3320_read(dev, PMW3320_REG_MOTION, &motion) != 0) return;
 
     if (motion & 0x80) {
-        pmw3320_read(dev, PMW3320_REG_DELTA_X_L, &xl);
-        pmw3320_read(dev, PMW3320_REG_DELTA_X_H, &xh);
-        pmw3320_read(dev, PMW3320_REG_DELTA_Y_L, &yl);
-        pmw3320_read(dev, PMW3320_REG_DELTA_Y_H, &yh);
+        // Picoのロジックに従い、0x03, 0x04, 0x0C を読み取る
+        pmw3320_read(dev, 0x03, &dx_low);
+        pmw3320_read(dev, 0x04, &dy_low);
+        pmw3320_read(dev, 0x0C, &dxy_hi);
 
-        int16_t x = (int16_t)((xh << 8) | xl);
-        int16_t y = (int16_t)((yh << 8) | yl);
+        // 12ビットデータの結合
+        int16_t dx = ((dxy_hi & 0x0F) << 8) | dx_low;
+        int16_t dy = ((dxy_hi & 0xF0) << 4) | dy_low;
 
-        LOG_ERR("Raw Motion! X: %d, Y: %d", x, y);
+        // 12bit符号付き(2の補数)の処理
+        if (dx > 2047) dx -= 4096;
+        if (dy > 2047) dy -= 4096;
 
-        input_report_rel(dev, INPUT_REL_X, x, false, K_FOREVER);
-        input_report_rel(dev, INPUT_REL_Y, y, true, K_FOREVER);
+        // X, Yが -1 以外になっているか確認用のログ
+        if (dx != 0 || dy != 0) {
+             LOG_ERR("Motion: X=%d, Y=%d", dx, dy);
+        }
+
+        input_report_rel(dev, INPUT_REL_X, dx, false, K_FOREVER);
+        input_report_rel(dev, INPUT_REL_Y, dy, true, K_FOREVER);
     }
 }
 
