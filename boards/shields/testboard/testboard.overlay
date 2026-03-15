@@ -9,9 +9,6 @@
         zephyr,console = &cdc_acm_uart;
     };
 
-    cdc_acm_uart: cdc_acm_uart {
-        compatible = "zephyr,cdc-acm-uart";
-    };
 
     /* これが physical_layouts.c のエラーを直すための定義です */
     physical_layouts {
@@ -36,6 +33,13 @@
     kscan0: kscan {
         compatible = "zmk,kscan-gpio-direct";
         input-gpios = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+    };
+};
+
+
+&zephyr_udc0 {
+    cdc_acm_uart: cdc_acm_uart {
+        compatible = "zephyr,cdc-acm-uart";
     };
 };
 

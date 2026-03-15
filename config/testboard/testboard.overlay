@@ -9,10 +9,7 @@
         zephyr,console = &cdc_acm_uart;
     };
 
-    cdc_acm_uart: cdc_acm_uart {
-        compatible = "zephyr,cdc-acm-uart";
-    };
-    
+
     /* これが physical_layouts.c のエラーを直すための定義です */
     physical_layouts {
         compatible = "zmk,physical-layouts";
@@ -38,6 +35,14 @@
         input-gpios = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
     };
 };
+
+/* USBコントローラーに仮想シリアルポートを紐付ける */
+&zephyr_udc0 {
+    cdc_acm_uart: cdc_acm_uart {
+        compatible = "zephyr,cdc-acm-uart";
+    };
+};
+
 
 &pinctrl {
     spi0_default: spi0_default {
