@@ -24,17 +24,25 @@ struct pmw3320_data {
 // 3-wire SPI リード
 static int pmw3320_read(const struct device *dev, uint8_t reg, uint8_t *val) {
     const struct pmw3320_config *config = dev->config;
-    uint8_t addr = reg & ~0x80;
-    
+    uint8_t addr = reg & 0x7F; // リードは最上位ビットを0にする
+    *val = 0; // 受信値を初期化
+
     struct spi_buf tx_buf = { .buf = &addr, .len = 1 };
     struct spi_buf_set tx = { .buffers = &tx_buf, .count = 1 };
+    
+    // 受信用のバッファ
     struct spi_buf rx_buf = { .buf = val, .len = 1 };
     struct spi_buf_set rx = { .buffers = &rx_buf, .count = 1 };
 
+    // 1. まずアドレスを送信
     int ret = spi_write_dt(&config->bus, &tx);
     if (ret < 0) return ret;
     
-    k_busy_wait(35);
+    // 2. PMW3320のデータシート指定：tSRAD (35us以上) 待機
+    // 通信が不安定な場合はここを 100 くらいまで増やしてみてください
+    k_busy_wait(50); 
+    
+    // 3. データを読み取る
     return spi_read_dt(&config->bus, &rx);
 }
 
@@ -83,14 +91,23 @@ static int pmw3320_init(const struct device *dev) {
     const struct pmw3320_config *config = dev->config;
     struct pmw3320_data *data = dev->data;
 
-    uint8_t pid;
-    int ret = pmw3320_read(dev, PMW3320_REG_PRODUCT_ID, &pid);
-    LOG_ERR("PMW3320 communication test - RET: %d, PID: 0x%02x", ret, pid);
-
     if (!device_is_ready(config->bus.bus)) return -ENODEV;
 
+    // --- 起動シーケンスの強化 ---
     pmw3320_write(dev, PMW3320_REG_POWER_UP_RESET, PMW3320_RESET_VALUE);
-    k_msleep(50);
+    k_msleep(50); // リセット待機
+    
+    // Motionレジスタを一度空読みして状態をクリア
+    uint8_t dummy;
+    pmw3320_read(dev, PMW3320_REG_MOTION, &dummy);
+    pmw3320_read(dev, PMW3320_REG_DELTA_X_L, &dummy);
+    pmw3320_read(dev, PMW3320_REG_DELTA_Y_L, &dummy);
+
+    // 通信テスト (ログを LOG_ERR にして確実に表示)
+    uint8_t pid = 0;
+    pmw3320_read(dev, PMW3320_REG_PRODUCT_ID, &pid);
+    LOG_ERR("PMW3320 Check PID: 0x%02x (Expected: 0x39)", pid);
+    // ---
 
     data->dev = dev;
     k_work_init(&data->work, pmw3320_work_handler);
