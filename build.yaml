@@ -23,4 +23,3 @@ include:
     shield: testboard
     snippet: studio-rpc-usb-uart
     cmake-args: -DCONFIG_ZMK_STUDIO=y
-                -DZMK_EXTRA_MODULES=/__w/zmk-config/zmk-config

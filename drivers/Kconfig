@@ -1,0 +1,2 @@
+# sensor配下のKconfigを読み込む
+osource "drivers/sensor/pmw3320/Kconfig"
