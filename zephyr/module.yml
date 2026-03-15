@@ -1,3 +1,4 @@
+# zephyr/module.yml
 build:
-  settings:
-    board_root: .
+  cmake: .
+  kconfig: .  # drivers配下のKconfigを読みに行くように設定

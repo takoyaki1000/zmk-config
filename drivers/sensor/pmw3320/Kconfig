@@ -1,0 +1,7 @@
+# drivers/sensor/pmw3320/Kconfig
+config PMW3320
+    bool "PMW3320 optical mouse sensor"
+    default n
+    depends on SPI
+    help
+      Enable driver for PMW3320 sensor.
