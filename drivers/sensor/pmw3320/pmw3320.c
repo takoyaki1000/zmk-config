@@ -77,6 +77,8 @@ static void pmw3320_work_handler(struct k_work *work) {
         int16_t x = (int16_t)((xh << 8) | xl);
         int16_t y = (int16_t)((yh << 8) | yl);
 
+        LOG_ERR("Raw Motion! X: %d, Y: %d", x, y);
+
         input_report_rel(dev, INPUT_REL_X, x, false, K_FOREVER);
         input_report_rel(dev, INPUT_REL_Y, y, true, K_FOREVER);
     }
