@@ -1,14 +1,25 @@
 #include <dt-bindings/zmk/matrix_transform.h>
-
+#include <physical_layouts.dtsi>
+#include "testboard-layouts.dtsi"
 
 / {
-    /* --- 追加: ZMKの基盤設定 --- */
     chosen {
         zmk,kscan = &kscan0;
         zmk,matrix-transform = &default_transform;
     };
 
-    /* 最小限の変換定義 (1x1) */
+    /* これが physical_layouts.c のエラーを直すための定義です */
+    physical_layouts {
+        compatible = "zmk,physical-layouts";
+        default_layout: layout_main {
+            compatible = "zmk,physical-layout";
+            display-name = "Default Layout";
+            transform = <&default_transform>;
+            kscan = <&kscan0>;
+        };
+    };
+
+    /* 最小限の行列定義 */
     default_transform: keymap_transform_0 {
         compatible = "zmk,matrix-transform";
         columns = <1>;
@@ -16,12 +27,11 @@
         map = <RC(0,0)>;
     };
 
-    /* ダミーのキースキャン定義（エラー回避用） */
+    /* ダミーの入力定義 */
     kscan0: kscan {
         compatible = "zmk,kscan-gpio-direct";
         input-gpios = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
     };
-    /* -------------------------- */
 };
 
 &pinctrl {
