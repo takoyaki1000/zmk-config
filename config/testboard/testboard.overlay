@@ -1,71 +1,46 @@
-// This file was generated from a template. Edit it to match your keyboard.
-// See https://zmk.dev/docs/development/hardware-integration/new-shield for more
-// instructions.
-
 #include <dt-bindings/zmk/matrix_transform.h>
+/* ZMK Studio無効時は physical_layouts.dtsi が悪影響を及ぼす場合があるため、
+   エラーが出るようなら一時的に以下の include をコメントアウトしてください */
 #include <physical_layouts.dtsi>
 #include "testboard-layouts.dtsi"
 
-// / {
-//     chosen {
-//         zmk,physical-layout = &default_layout;
-//     };
-// 
-//     kscan: kscan {
-//         // If the hardware does not use a switch matrix, change this to the
-//         // appropriate driver and update the properties below to match.
-//         // See https://zmk.dev/docs/config/kscan for supported key scan drivers.
-//         compatible = "zmk,kscan-gpio-matrix";
-//         // Set this to "col2row" or "row2col" to match the hardware. If using
-//         // "row2col", change the col-gpios to (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)
-//         // and the row-gpios to GPIO_ACTIVE_HIGH.
-//         diode-direction = "col2row";
-//         wakeup-source;
-// 
-//         // Replace these comments with the GPIO pins in the matrix.
-//         // See https://zmk.dev/docs/development/hardware-integration/new-shield#shield-overlays
-//         col-gpios
-//             = <&xiao_d 2 GPIO_ACTIVE_HIGH>
-//             , <&xiao_d 3 GPIO_ACTIVE_HIGH>
-//             , <&xiao_d 4 GPIO_ACTIVE_HIGH>
-//             ;
-// 
-//         row-gpios
-//             = <&xiao_d 0 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
-//             , <&xiao_d 1 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
-//             ;
-//     };
-// 
-//     default_transform: default_transform {
-//         // See https://zmk.dev/docs/development/hardware-integration/new-shield#matrix-transform
-//         // for how to configure this
-//         compatible = "zmk,matrix-transform";
-//         columns = <3>;
-//         rows = <2>;
-// 
-//         map = <
-//             RC(0, 0) RC(0, 1) RC(0, 2)
-//             RC(1, 0) RC(1, 1) RC(1, 2)
-//         >;
-//     };
-// 
-// };
+/ {
+    /* --- 追加: ZMKの基盤設定 --- */
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,matrix-transform = &default_transform;
+    };
+
+    /* 最小限の変換定義 (1x1) */
+    default_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        columns = <1>;
+        rows = <1>;
+        map = <RC(0,0)>;
+    };
+
+    /* ダミーのキースキャン定義（エラー回避用） */
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-direct";
+        input-gpios = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+    };
+    /* -------------------------- */
+};
+
 &pinctrl {
     spi0_default: spi0_default {
         group1 {
-            psels = <NRF_PSEL(SPIM_SCK, 0, 5)>   // SCLK
-                  , <NRF_PSEL(SPIM_MOSI, 0, 4)>  // SDIO
-                  , <NRF_PSEL(SPIM_MISO, 0, 4)>  // SDIO
-                  ;
+            psels = <NRF_PSEL(SPIM_SCK, 0, 5)>,
+                    <NRF_PSEL(SPIM_MOSI, 0, 4)>,
+                    <NRF_PSEL(SPIM_MISO, 0, 4)>;
         };
     };
 
     spi0_sleep: spi0_sleep {
         group1 {
-            psels = <NRF_PSEL(SPIM_SCK, 0, 5)>   // SCLK
-                  , <NRF_PSEL(SPIM_MOSI, 0, 4)>  // SDIO
-                  , <NRF_PSEL(SPIM_MISO, 0, 4)>  // SDIO
-                  ;
+            psels = <NRF_PSEL(SPIM_SCK, 0, 5)>,
+                    <NRF_PSEL(SPIM_MOSI, 0, 4)>,
+                    <NRF_PSEL(SPIM_MISO, 0, 4)>;
             low-power-enable;
         };
     };
@@ -73,8 +48,9 @@
 
 &spi0 {
     status = "okay";
-    pinctrl-0 = <&spi0_default>; // XIAOのピン定義を確認
-    pinctrl-names = "default";
+    pinctrl-0 = <&spi0_default>;
+    pinctrl-1 = <&spi0_sleep>; // sleep用も指定
+    pinctrl-names = "default", "sleep"; // "sleep"を追加
     cs-gpios = <&xiao_d 3 GPIO_ACTIVE_LOW>;
 
     trackball: pmw3320@0 {
@@ -87,7 +63,6 @@
 };
 
 / {
-    // ZMKのポインティングデバイス入力を有効化
     trackball_listener {
         compatible = "zmk,input-listener";
         device = <&trackball>;
