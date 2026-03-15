@@ -4,6 +4,7 @@
 #include <zephyr/input/input.h>
 #include <zephyr/logging/log.h>
 #include "pmw3320_reg.h"
+#define DT_DRV_COMPAT pixart_pmw3320
 
 LOG_MODULE_REGISTER(PMW3320, CONFIG_SENSOR_LOG_LEVEL);
 
@@ -94,15 +95,16 @@ static int pmw3320_init(const struct device *dev) {
     return 0;
 }
 
-// インスタンス化マクロ
 #define PMW3320_INIT(n) \
     static struct pmw3320_data pmw3320_data_##n; \
     static const struct pmw3320_config pmw3320_config_##n = { \
         .bus = SPI_DT_SPEC_INST_GET(n, SPI_WORD_SET(8) | SPI_TRANSFER_MSB, 0), \
         .irq_gpio = GPIO_DT_SPEC_INST_GET_OR(n, irq_gpios, {0}), \
     }; \
-    DEVICE_DT_INST_DEFINE(n, pmw3320_init, NULL, &pmw3320_data_##n, \
-                         &pmw3320_config_##n, POST_KERNEL, \
-                         CONFIG_INPUT_INIT_PRIORITY, NULL);
+    /* POST_KERNEL で初期化し、優先度を低めに設定 */ \
+    DEVICE_DT_INST_DEFINE(n, pmw3320_init, NULL, \
+                         &pmw3320_data_##n, &pmw3320_config_##n, \
+                         POST_KERNEL, CONFIG_INPUT_INIT_PRIORITY, \
+                         NULL);
 
 DT_INST_FOREACH_STATUS_OKAY(PMW3320_INIT)
