@@ -1,8 +1,5 @@
 #include <dt-bindings/zmk/matrix_transform.h>
-/* ZMK Studio無効時は physical_layouts.dtsi が悪影響を及ぼす場合があるため、
-   エラーが出るようなら一時的に以下の include をコメントアウトしてください */
-#include <physical_layouts.dtsi>
-#include "testboard-layouts.dtsi"
+
 
 / {
     /* --- 追加: ZMKの基盤設定 --- */
