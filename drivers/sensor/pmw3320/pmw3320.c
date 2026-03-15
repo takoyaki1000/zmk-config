@@ -79,6 +79,10 @@ static int pmw3320_init(const struct device *dev) {
     const struct pmw3320_config *config = dev->config;
     struct pmw3320_data *data = dev->data;
 
+    uint8_t pid;
+    pmw3320_read(dev, PMW3320_REG_PRODUCT_ID, &pid);
+    LOG_INF("PMW3320 Product ID: 0x%02x", pid);
+
     if (!device_is_ready(config->bus.bus)) return -ENODEV;
 
     pmw3320_write(dev, PMW3320_REG_POWER_UP_RESET, PMW3320_RESET_VALUE);
